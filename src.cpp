@@ -4,7 +4,7 @@
 FILTER_DLL filter = {
     FILTER_FLAG_ALWAYS_ACTIVE | FILTER_FLAG_NO_CONFIG,
     NULL,NULL,
-    const_cast<char*>("ä‘à¯Ç¢Çƒï`âÊ"),
+    const_cast<char*>("ÈñìÂºï„ÅÑ„Å¶ÊèèÁîª"),
     NULL,NULL,NULL,
     NULL,NULL,
     NULL,NULL,NULL,
@@ -16,6 +16,7 @@ EXTERN_C FILTER_DLL __declspec(dllexport)* __stdcall GetFilterTable(void) {
 }
 
 static inline void(__cdecl* exedit_rendering)(void* dst, double* polydata, int polynum, void* src, int* sizeinfo, int alpha, int flag); // 79350
+static int* exedit_ini_thin_out_process_ptr;
 static int* exedit_thin_out_process_ptr;
 
 static int exedit_base;
@@ -28,7 +29,7 @@ FILTER* get_exeditfp(FILTER* fp) {
     for (int i = 0; i < si.filter_n; i++) {
         FILTER* tfp = (FILTER*)fp->exfunc->get_filterp(i);
         if (tfp->information != NULL) {
-            if (!strcmp(tfp->information, "ägí£ï“èW(exedit) version 0.92 by ÇjÇdÇmÇ≠ÇÒ")) return tfp;
+            if (!strcmp(tfp->information, "Êã°ÂºµÁ∑®ÈõÜ(exedit) version 0.92 by Ôº´Ôº•ÔºÆ„Åè„Çì")) return tfp;
         }
     }
     return NULL;
@@ -48,7 +49,7 @@ BOOL exedit_ReplaceCall(DWORD exedit_address, void* new_address) {
 
 void __cdecl exedit_rendering_wrap(void* dst, double* polydata, int polynum, void* src, int* sizeinfo, int alpha, int flag) {
     int exedit_thin_out_process = *exedit_thin_out_process_ptr;
-    *exedit_thin_out_process_ptr = 1;
+    *exedit_thin_out_process_ptr = *exedit_ini_thin_out_process_ptr;
     exedit_rendering(dst, polydata, polynum, src, sizeinfo, alpha, flag);
     *exedit_thin_out_process_ptr = exedit_thin_out_process;
 }
@@ -56,13 +57,14 @@ void __cdecl exedit_rendering_wrap(void* dst, double* polydata, int polynum, voi
 BOOL func_init(FILTER* fp) {
     FILTER* exeditfp = get_exeditfp(fp);
     if (exeditfp == NULL) {
-        MessageBoxA(fp->hwnd, "ägí£ï“èW0.92Ç™å©Ç¬Ç©ÇËÇ‹ÇπÇÒÇ≈ÇµÇΩ", fp->name, MB_OK);
+        MessageBoxA(fp->hwnd, "Êã°ÂºµÁ∑®ÈõÜ0.92„ÅåË¶ã„Å§„Åã„Çä„Åæ„Åõ„Çì„Åß„Åó„Åü", fp->name, MB_OK);
         return TRUE;
     }
     exedit_base = (int)exeditfp->dll_hinst;
     exedit_hwnd = exeditfp->hwnd;
 
     exedit_rendering = reinterpret_cast<decltype(exedit_rendering)>(exedit_base + 0x79350);
+    exedit_ini_thin_out_process_ptr = (int*)(exedit_base + 0x179114);
     exedit_thin_out_process_ptr = (int*)(exedit_base + 0x2308a0);
 
     exedit_ReplaceCall(0x4c600, &exedit_rendering_wrap);
